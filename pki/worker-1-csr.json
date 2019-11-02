@@ -1,0 +1,18 @@
+{
+    "CN": "system:node:worker-1",
+    "key":
+    {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names":
+    [
+        {
+            "C": "US",
+            "L": "Seattle",
+            "O": "system:nodes",
+            "OU": "Developers",
+            "ST": "Washington"
+        }
+    ]
+}

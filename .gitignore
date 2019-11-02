@@ -1,0 +1,5 @@
+/azure/windows/out/*
+*.pem
+*.csr
+*.cer
+*.zip

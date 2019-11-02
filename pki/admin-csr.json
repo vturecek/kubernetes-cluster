@@ -1,0 +1,18 @@
+{
+    "CN": "admin",
+    "key":
+    {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names":
+    [
+        {
+            "C": "US",
+            "L": "Seattle",
+            "O": "system:masters",
+            "OU": "Admins",
+            "ST": "Washington"
+        }
+    ]
+}
