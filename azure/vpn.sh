@@ -1,6 +1,6 @@
 #!/bin/bash
 
-RESOURCEGROUP="kube"
+RESOURCEGROUP="vturecek-kube"
 VNET="kubernetes-vnet"
 NSG="kubernetes-nsg"
 

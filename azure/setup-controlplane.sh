@@ -1,3 +1,7 @@
+#!/bin/bash
+
+# Run this on each controller node.
+
 INTERNAL_IP=$(ip addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
 
 sudo mkdir -p /etc/kubernetes/config
@@ -102,4 +106,56 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 EOF
- 
+
+sudo systemctl daemon-reload
+sudo systemctl enable kube-apiserver kube-controller-manager kube-scheduler
+sudo systemctl start kube-apiserver kube-controller-manager kube-scheduler
+
+# RBAC for Kubelet auth
+# first, install kubectl
+sudo apt-get update && sudo apt-get install -y apt-transport-https
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+sudo apt-get install -y kubectl
+
+# create a ClusterRole that allows the API Server to access the kubelet API
+cat <<EOF | kubectl apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+  labels:
+    kubernetes.io/bootstrapping: rbac-defaults
+  name: system:kube-apiserver-to-kubelet
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/proxy
+      - nodes/stats
+      - nodes/log
+      - nodes/spec
+      - nodes/metrics
+    verbs:
+      - "*"
+EOF
+
+#Bind this role to the "kubernetes" user
+cat <<EOF | kubectl apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:kube-apiserver
+  namespace: ""
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:kube-apiserver-to-kubelet
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: Kubernetes
+EOF
+
